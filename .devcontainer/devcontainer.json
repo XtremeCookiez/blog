@@ -1,5 +1,13 @@
 {
     "build": {
         "dockerfile": "dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "yzhang.markdown-all-in-one",
+                "DavidAnson.vscode-markdownlint"
+            ]
+        }
     }
 }
