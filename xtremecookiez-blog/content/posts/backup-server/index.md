@@ -1,14 +1,12 @@
 ---
 title: "Backup Server"
 date: 2023-12-29T01:33:34Z
-draft: true
+draft: false
 ---
-
-# Backup Server
 
 I wanted to create an offsite server to host some backups and potentially run some services.
 
-## Requirements
+# Requirements
 
 1. Low cost < $200
     - I don't want to spend a ton of money on this thing. And I don't need a ton of storage. So I
@@ -23,10 +21,10 @@ I wanted to create an offsite server to host some backups and potentially run so
       config files for the services I run on my local server.
 5. An easy, robust method of remote access.
 
-## The Hardware
+# The Hardware
 
 Before we get into it, I must confess: I have a small addiction to used Dell machines. My main
-server for the past 5 years has been an old Dell optiplex tower and my current router is a small
+server for the past 5 years has been an old Dell Optiplex tower and my current router is a small
 form factor Dell Inspiron.
 
 Enter the **Dell Optiplex 3050 Micro**.
@@ -44,16 +42,16 @@ the cost hit to upgrade to an SSD
 
 This brings my total cost to **$147**.
 
-## The software
+# The software
 
-### OS
+## OS
 
 I decided to try out CentOS Stream for this build. Mainly for it having a long support life and
 rolling release. I normally run Ubuntu on my servers, but wanted to try a rolling distro to
-hopefully avoid many problems occuring at once when doing OS upgrades. I'd love to hear your
+hopefully avoid many problems occurring at once when doing OS upgrades. I'd love to hear your
 thoughts on good OSes for servers.
 
-### Filesystem
+## Filesystem
 
 My primary server runs ZFS and I love all the features it provides. Things like encryption,
 snapshots, and block level checksums. It's also fairly easy to import onto another machine. I've
@@ -62,7 +60,7 @@ plugged in half of a ZFS array and had it mounted in minutes.
 So, I decided that my storage drive here would also be ZFS. This way I can easily perform
 incremental backups using `zfs send`.
 
-### Remote Access
+## Remote Access
 
 For simplicity, I decided my remote access should be managed with SSH. I'll be using one of Oracle's
 free tier cloud machines as my jump box. I also setup a domain to point to it's IP. While I used a
@@ -83,6 +81,78 @@ your system very robust and allow for easy remote recovery even in catastrophic 
 1. Give your server a domain name. You will use this to connect to the server instead of the IP. So
    that in case your IP ever changes, you can simply change the DNS record.
 2. Backup the host keys of the public machine. This way if you need to "hot swap" the public server,
-   you can copy the host keys to a new server and it will have the same fingerprint as the old
-   one.
+   you can copy the host keys to a new server and it will have the same fingerprint as the old one.
+    - Ensure you keep these in a secure place (ideally encrypted) since these are the private keys
+      on your server.
 
+### Reverse SSH Service
+
+On your offsite server create an SSH key for the root user:
+
+```bash
+sudo ssh-keygen -t ecdsa
+```
+
+Create a new file at `/etc/systemd/system/ssh-reverse.service`. And copy the contents below. Be sure
+to update the domain, key path, and user on the ssh command.
+
+```ini
+[Unit]
+Description=Reverse SSH connection
+After=network.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/usr/bin/ssh -vvv -g -N -T -o "ServerAliveInterval 10" -o "ExitOnForwardFailure yes" -R 22221:localhost:22 -i /root/.ssh/id_ecdsa user@ssh.example.com
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=default.target
+```
+
+Start the service `sudo systemctl enable ssh-reverse && sudo systemctl start ssh-reverse`. If you're
+using a redhat based distro like me, you might need to play with selinux settings since it is likely
+blocking ssh from running.
+
+Now SSH to your public server and verify you can access your offsite server. Once connected you
+should be able to run the following command and get a response.
+
+```bash
+ssh offsiteUsername@localhost -p 22221
+```
+
+Now, anytime your offsite machine gets an internet connection, it will connect to your public server
+and you will be able to access it.
+
+#### Explanation
+
+We're setting our reverse SSH command up as a systemd service so it will automatically run and
+restart.
+
+Really the only important part of that ssh command is `-R 22221:localhost:22`. This tells SSH to
+forward all traffic on port 22221 on the public server to `localhost:22` on this machine. Note that
+by default the remote server will only listen on it's localhost. If you want to make the port
+publicly available you can add a bind address like this: `0.0.0.0:22221:localhost:22`. However you
+will need to set the `GatewayPorts` option on the public server's sshd config.
+
+### Client configuration
+
+Now moving on to the machine you want to access the offsite server from.
+
+We'll be using SSH's `ProxyJump` feature. Basically this will let you SSH to a proxy server then SSH
+to your destination from there. In our case we'll be using the public SSH server for this.
+
+You need to add the following to your `~/.ssh/config`.
+
+```conf
+Host offsite
+	HostName localhost
+	Port 22221
+	User offsiteuser
+	Proxyjump publicserver
+	IdentityFile ~/.ssh/id_ecdsa
+```
+
+**Congratulations** You can access your offsite server from anywhere!
