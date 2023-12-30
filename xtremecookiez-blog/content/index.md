@@ -1,6 +1,9 @@
 ---
 title: "XtremeCookiez's Blog"
+menus: main
 description: ""
+showDate: false
+homepage.showRecent: true
 ---
 
 I'm a software developer who also loves fitness, cars, and cooking. I'm not really sure what will
