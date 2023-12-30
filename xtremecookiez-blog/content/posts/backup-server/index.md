@@ -4,7 +4,9 @@ date: 2023-12-29T01:33:34Z
 draft: false
 ---
 
-I wanted to create an offsite server to host some backups and potentially run some services.
+I wanted to create an offsite server to host some backups and potentially run some services. This is
+a half blog post and half tutorial. I'll try to capture the steps needed to recreate it, but by no
+means am I saying this is the best way to create or setup such a server.
 
 # Requirements
 
@@ -29,18 +31,24 @@ form factor Dell Inspiron.
 
 Enter the **Dell Optiplex 3050 Micro**.
 
+![](edited-PXL_20231205_042548475.jpg)
+
 It's nothing special, but can be picked up for relatively cheap and meets all my hardware
-requirements. I spent $192 for 3 shipped to me off of ebay ($64 a piece). It has a i5-7500, 8GB RAM,
-and a 256GB NVMe boot drive. Really not bad for < $70.
+requirements. I spent $192 for 3 shipped to me off of ebay ($64 a piece). It has a quad core
+i5-7500, 8GB RAM, and a 256GB NVMe boot drive. Really not bad for < $70.
 
 The major downside is that it only has a single 2.5" drive slot. While not a limitation in my
 instance, it may be for those looking for larger storage or redundant drives.
 
 SATA SSDs have gotten surprisingly cheap even compared to 2.5" hard drives. So I picked up a
 Teamgroup AX2 2TB for $84. Not an amazing deal, but 2TB 2.5" hard drives cost ~$70. So, I'll take
-the cost hit to upgrade to an SSD
+the cost hit to upgrade to an SSD.
 
 This brings my total cost to **$147**.
+
+Plus at idle this thing draws < 10 Watts!
+
+![Less than 10 Watts](edited-watts.jpg)
 
 # The software
 
@@ -154,5 +162,3 @@ Host offsite
 	Proxyjump publicserver
 	IdentityFile ~/.ssh/id_ecdsa
 ```
-
-**Congratulations** You can access your offsite server from anywhere!
