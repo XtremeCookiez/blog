@@ -8,3 +8,6 @@
 	path = xtremecookiez-blog/themes/blowfish
 	url = https://github.com/nunocoracao/blowfish.git
 	branch = main
+[submodule "xtremecookiez.github.io"]
+	path = xtremecookiez.github.io
+	url = git@github.com:XtremeCookiez/xtremecookiez.github.io.git
