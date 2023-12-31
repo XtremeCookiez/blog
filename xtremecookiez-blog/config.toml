@@ -15,7 +15,7 @@ summaryLength = 0
 
 buildDrafts = false
 buildFuture = false
-sectionPagesMenu = 'main'
+# sectionPagesMenu = 'main'
 
 [Params]
     # mainSections = ["post"]
@@ -41,8 +41,8 @@ sectionPagesMenu = 'main'
 
 [menus]
 [[menus.main]]
-    name = 'Posts'
-    url = '/posts/'
+    name = 'Computer Stuff'
+    url = '/computer-stuff/'
     weight = 10
 
 

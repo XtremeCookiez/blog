@@ -1,6 +1,6 @@
 ---
 title: "XtremeCookiez's Blog"
-menus: main
+# menus: main
 description: ""
 showDate: false
 homepage.showRecent: true
